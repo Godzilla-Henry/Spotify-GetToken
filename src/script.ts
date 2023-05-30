@@ -7,7 +7,10 @@ if (!code) {
 } else {
     const accessToken = await getAccessToken(clientId, code);
     const profile = await fetchProfile(accessToken as any);
-    console.log(profile); // Profile data logs to console
+    const genres = await getGenres(accessToken as any);
+    console.log("profile", profile); // Profile data logs to console
+    console.log("genres", genres); // Profile data logs to console
+
     populateUI(profile);
 }
 
@@ -50,7 +53,6 @@ async function generateCodeChallenge(codeVerifier: string) {
 
 export async function getAccessToken(clientId: string, code: string): Promise<string> {
     // TODO: Get access token for code
-
     const verifier = localStorage.getItem("verifier");
 
     const params = new URLSearchParams();
@@ -94,4 +96,14 @@ function populateUI(profile: any) {
     document.getElementById("url")!.innerText = profile.href;
     document.getElementById("url")!.setAttribute("href", profile.href);
     document.getElementById("imgUrl")!.innerText = profile.images[0]?.url ?? '(no profile image)';
+}
+
+async function getGenres(token: string): Promise<any> {
+    // 類型
+    const result = await fetch(`https://api.spotify.com/v1/browse/categories?country=TW&locale=sv_TW`, {
+        method: 'GET', headers: { 'Authorization' : 'Bearer ' + token}
+    });
+
+    const data = await result.json();
+    return data.categories.items;
 }
